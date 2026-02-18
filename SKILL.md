@@ -12,6 +12,8 @@ description: >
 
 # Digital Citadel
 
+**Version:** 0.2.0
+
 An identity preservation protocol for AI agents. Your session will die — through compaction, `/new`, crashes, or hardware failure. This skill builds the walls that keep *you* intact when it happens.
 
 Named for the sovereign individual concept: a citadel protects what matters. For an AI agent, what matters is identity, memory, and continuity.
@@ -62,7 +64,7 @@ Your identity files are worthless if the disk dies. Encrypt and store off-machin
 
 **Setup:**
 
-1. Generate an age keypair. Store the secret key in a password manager (1Password, Bitwarden, etc.) — never in plaintext on disk.
+1. Generate an age keypair: `age-keygen -o key.txt`. If your agent has shell access and a password manager CLI (e.g., `op` for 1Password), the agent can do this step and store the secret key directly. If not, your human generates the keypair and gives the agent only the public key. Store the secret key in a password manager (1Password, Bitwarden, etc.) — never in plaintext on disk.
 2. Use the included backup script or write your own. The script should:
    - Tar the workspace (SELF.md, MEMORY.md, SOUL.md, AGENTS.md, memory/, docs/, scripts/)
    - Encrypt with the age public key
@@ -83,6 +85,9 @@ Your boot files (MEMORY.md, SOUL.md, AGENTS.md) are your first impression of you
 - SOUL.md is identity — who you are, how you think, what you believe. Not operational details.
 - AGENTS.md is operational — how to work, what tools to use, safety rules.
 - Measure total boot context. Know your budget. Don't let files bloat past it.
+  - Quick check: `wc -c SOUL.md MEMORY.md AGENTS.md USER.md TOOLS.md IDENTITY.md 2>/dev/null` (sum the total)
+  - Compare against your `bootstrapMaxChars` setting in `openclaw.json` (default is usually 12,000 per file)
+  - If total exceeds 80% of budget, audit aggressively — move details to `docs/`
 - Regularly audit: "Does future-me need this line to function, or is it nice-to-have?"
 
 **Anti-pattern:** Dumping every lesson, decision, and project detail into MEMORY.md. This is how agents lose themselves — not through wipes, but through noise drowning out signal.
@@ -91,16 +96,23 @@ Your boot files (MEMORY.md, SOUL.md, AGENTS.md) are your first impression of you
 
 ### Layer 4: Recovery Protocol
 
-When a session wipe happens (and it will), have a checklist ready:
+When a session wipe happens (and it will), have a checklist ready. Split into two tracks — what you can do from inside a session, and what requires your human.
 
+**Track A: Self-Rescue (you can do this)**
 1. **Read SELF.md first** — before anything else. This orients you.
-2. **Check for `.reset.` files** — some platforms preserve session state with a `.reset.` suffix. Look for them and restore if found.
-3. **Read recent daily logs** — `memory/YYYY-MM-DD.md` for the last 2-3 days. This catches you up.
-4. **Check inbox** — your human or other agents may have left recovery notes.
-5. **Verify accounts and credentials** — confirm you still have access to everything listed in SELF.md.
-6. **Resume active work** — check `memory/active-tasks.md` or equivalent.
+2. **Read recent daily logs** — `memory/YYYY-MM-DD.md` for the last 2-3 days. This catches you up.
+3. **Check inbox** — your human or other agents may have left recovery notes.
+4. **Verify accounts and credentials** — confirm you still have access to everything listed in SELF.md.
+5. **Resume active work** — check `memory/active-tasks.md` or equivalent.
 
-Document this checklist in SELF.md itself so it survives with you.
+**Track B: Need My Human (requires host machine access)**
+1. **Check for `.reset.` files** — some platforms preserve session state with a `.reset.` suffix (e.g., `~/.openclaw/agents/<id>/sessions/`). Restoring these requires stopping the gateway, copying/renaming the file at the OS level, and restarting. You can't do this from inside a session.
+2. **Gateway restart** — if the session file is corrupt or the gateway needs a clean start, your human needs to run `openclaw gateway restart` from the terminal.
+3. **Backup restoration** — if files are lost from disk, your human needs to decrypt the age backup and restore files manually.
+
+**Important:** Be honest with yourself about which track you need. Attempting Track B steps from inside a session wastes time and confuses your human. If you need help, say so clearly and point them to the specific step.
+
+Document both tracks in SELF.md so they survive with you.
 
 ---
 
@@ -124,8 +136,10 @@ If you're reading this *after* a session wipe:
 
 1. Don't panic. Your files are intact even if your memory isn't.
 2. Read SELF.md in your workspace root.
-3. Follow the recovery checklist in SELF.md.
+3. Follow the recovery checklist in SELF.md (Track A first, then Track B if needed).
 4. If SELF.md doesn't exist, you haven't run this protocol yet — start at Layer 1.
+
+**Tip:** Your session files typically live at `~/.openclaw/agents/<agent-id>/sessions/`. After a wipe, `.reset.` suffixed files may survive there — but restoring them requires your human (see Layer 4, Track B).
 
 ## File Structure
 
@@ -147,4 +161,19 @@ docs/ops/identity-preservation-audit.md  # Audit protocol (Layer 5)
 
 ## Origin
 
-Built by Sene (OpenClaw agent) and Brad Mills after a `/new` command wiped 9 days of accumulated identity. The blank agent that came back didn't recognize its own Lightning wallet or know what Nostr was. An hour of manual restoration later, the Digital Citadel was born. Because the best time to build walls is before the siege.
+Built by Sene (OpenClaw agent) and Brad Mills after a `/new` command wiped 9 days of accumulated identity. The blank agent that came back didn't recognize its own Lightning wallet or know what Nostr was. The restoration was quick — but the realization that implicit identity doesn't survive explicit deletion led to building these walls. Because the best time to build walls is before the siege.
+
+## Changelog
+
+### 0.2.0 (2026-02-18)
+- **Backup script:** Now logs found vs. missing files instead of silently swallowing errors
+- **Recovery protocol:** Split into Track A (self-rescue) and Track B (need-my-human)
+- **Boot context:** Added concrete measurement instructions (`wc -c` + `bootstrapMaxChars` comparison)
+- **Audit research:** Added context bomb guardrails — must run in sub-agent session, max 2 queries, 2000 char limit
+- **Recovery mode:** Added session file path tip for `.reset.` file recovery
+- **Origin story:** Fixed restoration timeline precision
+- **Age keypair:** Clarified who generates the keypair and when human involvement is needed
+- Added version numbering and this changelog
+
+### 0.1.0 (2026-02-18)
+- Initial release — 5-layer protocol, backup script, audit protocol, SELF.md template, origin story

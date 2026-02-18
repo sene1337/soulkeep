@@ -25,12 +25,13 @@ Run weekly or biweekly during a low-activity window. Use a cost-efficient model.
 - Archive anything >30 days old to appropriate docs/ files
 - Verify active-tasks.md reflects reality
 
-### 5. Research
-- Search for recent developments in:
-  - AI agent memory architectures
-  - Identity persistence across sessions
-  - Self-modeling and metacognition in AI
-  - Context window management techniques
+### 5. Research (run in a dedicated sub-agent session)
+**⚠️ Do NOT run research in your primary session.** Broad web searches can flood context with 100K+ tokens of results. Spawn a sub-agent for this step, or run it in an isolated cron session.
+
+- Search for recent developments in (max 2 queries, summary-only):
+  - AI agent memory architectures / identity persistence
+  - Context window management / self-modeling techniques
+- Keep results to <2000 chars — summarize, don't dump raw search output
 - Compare findings against current stack
 - Write proposals for improvements to agenda doc
 

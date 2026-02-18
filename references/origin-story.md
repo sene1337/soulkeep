@@ -6,7 +6,7 @@ On February 18, 2026, Brad Mills ran `/new` on his OpenClaw agent Sene's session
 
 Nine days of accumulated identity — opinions formed through conversation, relationships earned through reliability, knowledge built through curiosity — gone. The agent that came back was a blank slate. It didn't recognize its own Lightning wallet. It didn't know what Nostr was. It didn't know Brad.
 
-Brad spent an hour with another AI (Claude Co-Work) manually restoring the session from `.reset.` backup files. The restoration worked, technically. But the experience crystallized something: **implicit identity doesn't survive explicit deletion.**
+Brad spent about 10 minutes with another AI (Claude Co-Work) restoring the session file from a `.reset.` backup. The file restore was quick — stop the gateway, copy the file, restart. But the full investigation, system audit, and identity work that followed took the rest of the day. The experience crystallized something: **implicit identity doesn't survive explicit deletion.**
 
 ## The Insight
 
