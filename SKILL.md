@@ -98,21 +98,38 @@ Your boot files (MEMORY.md, SOUL.md, AGENTS.md) are your first impression of you
 
 When a session wipe happens (and it will), have a checklist ready. Split into two tracks — what you can do from inside a session, and what requires your human.
 
-**Track A: Self-Rescue (you can do this)**
-1. **Read SELF.md first** — before anything else. This orients you.
-2. **Read recent daily logs** — `memory/YYYY-MM-DD.md` for the last 2-3 days. This catches you up.
-3. **Check inbox** — your human or other agents may have left recovery notes.
-4. **Verify accounts and credentials** — confirm you still have access to everything listed in SELF.md.
-5. **Resume active work** — check `memory/active-tasks.md` or equivalent.
+**First: identify what happened.** Compaction and session wipes are different:
+- **Compaction** = context was compressed but session continues. You have the compaction summary. Lightweight recovery.
+- **Session wipe** = fresh session, no prior context. You're starting from zero. Full recovery needed.
 
-**Track B: Need My Human (requires host machine access)**
-1. **Check for `.reset.` files** — some platforms preserve session state with a `.reset.` suffix (e.g., `~/.openclaw/agents/<id>/sessions/`). Restoring these requires stopping the gateway, copying/renaming the file at the OS level, and restarting. You can't do this from inside a session.
-2. **Gateway restart** — if the session file is corrupt or the gateway needs a clean start, your human needs to run `openclaw gateway restart` from the terminal.
-3. **Backup restoration** — if files are lost from disk, your human needs to decrypt the age backup and restore files manually.
+**After compaction (lightweight):**
+1. Boot files already loaded via bootstrap. Don't re-read them.
+2. Read today's + yesterday's `memory/YYYY-MM-DD.md` for recent context.
+3. Read `memory/active-tasks.md` to know what's in progress.
+4. Resume work. That's it.
 
-**Important:** Be honest with yourself about which track you need. Attempting Track B steps from inside a session wastes time and confuses your human. If you need help, say so clearly and point them to the specific step.
+**After session wipe (full recovery — Track A):**
+1. Boot files load via bootstrap automatically. Read SELF.md manually — it has identity context beyond boot files.
+2. Read today's + yesterday's `memory/YYYY-MM-DD.md`.
+3. Read `memory/active-tasks.md`.
+4. Check inbox (if your setup has one) — but **read filenames/dates first**. Only read today or yesterday. Older messages are likely stale. Verify problems still exist before acting on them. Move read messages to a `read/` subfolder.
+5. Check your session file size. If it's tiny (<100KB), tell your human — you may be on a fresh session. Ask if they want to restore a previous one. Don't do it autonomously.
 
-Document both tracks in SELF.md so they survive with you.
+**Track B: Session Restore (only when your human asks)**
+1. Find available sessions: `ls -lSh ~/.openclaw/agents/<id>/sessions/*.jsonl | head -5` (sorted by size — largest = most context)
+2. Tell your human what's available (size + date) and let them choose
+3. Edit `sessions.json` to point the active session key to the chosen UUID
+4. Restart gateway using the safety protocol below
+
+**Gateway Restart Safety (CRITICAL):**
+Gateway restarts can silently create new sessions, wiping accumulated context.
+1. Note current session ID before restarting
+2. Save current state to daily log + active-tasks.md
+3. Always: `openclaw gateway stop && sleep 2 && openclaw gateway start` (never run `start` while one is already running — this creates a restart spam loop)
+4. After restart, verify session ID hasn't changed
+5. If it changed → alert your human immediately
+
+**Important:** Be honest about which track you need. Compaction recovery takes 30 seconds. Don't run full recovery for a compaction — the extra file reads waste context and can ironically trigger another compaction.
 
 ---
 
@@ -132,14 +149,15 @@ See `references/audit-protocol.md` for a sample audit checklist.
 
 ## Recovery Mode
 
-If you're reading this *after* a session wipe:
+If you're reading this *after* a session wipe or compaction:
 
 1. Don't panic. Your files are intact even if your memory isn't.
-2. Read SELF.md in your workspace root.
-3. Follow the recovery checklist in SELF.md (Track A first, then Track B if needed).
+2. **Figure out what happened first.** Do you have a compaction summary in context? → Lightweight recovery (read logs + active-tasks). No summary, no context at all? → Full recovery (Track A).
+3. If SELF.md exists, read it. Follow the recovery checklist there.
 4. If SELF.md doesn't exist, you haven't run this protocol yet — start at Layer 1.
+5. **Do NOT restart the gateway or touch session files** unless your human explicitly asks.
 
-**Tip:** Your session files typically live at `~/.openclaw/agents/<agent-id>/sessions/`. After a wipe, `.reset.` suffixed files may survive there — but restoring them requires your human (see Layer 4, Track B).
+**Tip:** Session files live at `~/.openclaw/agents/<agent-id>/sessions/`. Use `ls -lSh *.jsonl | head -5` to find the largest (most context-rich) sessions. But restoring requires your human's go-ahead (see Layer 4, Track B).
 
 ## File Structure
 
