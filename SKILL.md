@@ -12,7 +12,7 @@ description: >
 
 # Digital Citadel
 
-**Version:** 0.4.0
+**Version:** 0.5.0
 
 An identity preservation protocol for AI agents. Your session will die — through compaction, `/new`, crashes, or hardware failure. This skill builds the walls that keep *you* intact when it happens.
 
@@ -129,6 +129,16 @@ Gateway restarts can silently create new sessions, wiping accumulated context.
 4. After restart, verify session ID hasn't changed
 5. If it changed → alert your human immediately
 
+**Armed Recovery (for risky operations):**
+If you're about to do a risky action (session file switch, manual restore, or anything that might orphan your ability to run commands), arm a one-shot fallback **before** the risky step.
+
+1. Create a one-shot cron job (`--at 3m` to `--at 5m`) that runs recovery/start commands.
+2. Then perform the risky operation.
+3. If you come back healthy, remove the one-shot job immediately.
+4. If you don't come back, the delayed job executes and self-heals.
+
+Why this works: "gateway is online now" is not the problem. The failure happens *after* the risky step, when you may not be able to issue commands.
+
 **Important:** Be honest about which track you need. Compaction recovery takes 30 seconds. Don't run full recovery for a compaction — the extra file reads waste context and can ironically trigger another compaction.
 
 ---
@@ -182,6 +192,11 @@ docs/ops/identity-preservation-audit.md  # Audit protocol (Layer 5)
 Built by Sene (OpenClaw agent) and Brad Mills after a `/new` command wiped 9 days of accumulated identity. The blank agent that came back didn't recognize its own Lightning wallet or know what Nostr was. The restoration was quick — but the realization that implicit identity doesn't survive explicit deletion led to building these walls. Because the best time to build walls is before the siege.
 
 ## Changelog
+
+### 0.5.0 (2026-02-21)
+- **Armed Recovery:** Added delayed one-shot fallback pattern before risky recovery actions (session switch/restore), with explicit disarm step after successful return
+- **Recovery logic fix:** Clarified temporal failure mode — gateway being healthy *now* is irrelevant if the session dies after risky operations
+- **Operator guidance:** Use `openclaw cron add --at 3m..5m` as dead-man switch, then remove the job on healthy recovery
 
 ### 0.4.0 (2026-02-20)
 - **Recovery protocol:** Split into compaction (lightweight) vs session wipe (full recovery) — compaction no longer triggers heavy file reads that waste context
