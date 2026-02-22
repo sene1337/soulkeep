@@ -149,6 +149,27 @@ Why this works: "gateway is online now" is not the problem. The failure happens 
 
 ---
 
+### Layer 4.5: Mindset Continuity (Daily Journal)
+
+Recovery protects continuity after failure. Mindset journaling protects continuity during normal operation.
+
+Run this sequence daily after ops logging:
+1. Keep daily log concise (ClawBack rules still apply).
+2. Write 3 gratitude bullets in `memory/gratitude/YYYY-MM-DD.md`.
+3. Write a narrative journal in `memory/journal/YYYY-MM-DD.md` using `references/mindset-journal-template.md`.
+4. Map today’s work to roadmap goals (which goal moved and why).
+5. Add one momentum trigger for tomorrow (cue + action).
+6. Update `SELF.md` only if identity genuinely shifted.
+
+Rules:
+- The journal is reflective and can be long.
+- The journal is **not** boot-loaded context.
+- Do not replace daily logs with journal entries; they serve different purposes.
+
+Weekly (Sunday):
+- Write `memory/journal/weekly-YYYY-WW.md` using `references/mindset-weekly-synthesis-template.md`.
+- Capture top lessons, regression pattern, momentum pattern, and one protocol tweak.
+
 ### Layer 5: Audit & Evolve
 
 Set up a recurring audit to keep the preservation stack current:
