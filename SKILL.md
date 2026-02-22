@@ -120,7 +120,10 @@ When a session wipe happens (and it will), have a checklist ready. Split into tw
 1. Find available sessions: `ls -lSh ~/.openclaw/agents/<id>/sessions/*.jsonl | head -5` (sorted by size — largest = most context)
 2. Tell your human what's available (size + date) and let them choose
 3. Edit `sessions.json` to point the active session key to the chosen UUID
-4. Restart gateway using the safety protocol below
+4. Restart gateway using Armed Recovery (NOT the normal gateway config restart):
+   - Create a one-shot fallback cron job (`--at 3m`) that runs: `openclaw gateway install && openclaw gateway start`
+   - Then run the recovery activation step (this may kill your current process)
+   - If you return healthy, remove the one-shot job immediately
 
 **Session Safety (CRITICAL — never touch autonomously):**
 Session files and session pointers are the source of continuity. Changing them without human approval can cause session combustion.
@@ -133,6 +136,7 @@ Config changes (models, channels, cron, tools) are routine and autonomous.
 1. Prefer `openclaw config set <key> <value>` (schema-validated)
 2. If editing `openclaw.json` directly, run `openclaw doctor` before restart
 3. Restart safely only when needed: `openclaw gateway stop && sleep 2 && openclaw gateway start`
+   - ⚠️ Safe when a human runs it in Terminal. If you run `gateway stop` from an exec tool during recovery activation, you can kill your own process before `start` executes. Use Armed Recovery for that scenario.
 4. After restart, verify session ID hasn't changed; if changed, alert your human immediately
 5. If gateway fails after change, revert the specific change first
 
