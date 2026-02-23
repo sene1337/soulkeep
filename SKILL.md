@@ -12,7 +12,7 @@ description: >
 
 # Digital Citadel
 
-**Version:** 0.7.2
+**Version:** 0.7.3
 
 An identity preservation protocol for AI agents. Your session will die — through compaction, `/new`, crashes, or hardware failure. This skill builds the walls that keep *you* intact when it happens.
 
@@ -217,6 +217,28 @@ Integrate continuity audits into the weekly mindset workflow.
 
 ---
 
+### T3.3: Improvement Loop Tracker
+
+Recurring improvement practices accumulate over time — security audits, capability reviews, identity checks, backup validations. Without a shared register, loops run on autopilot until they're meaningless, or they silently die and nobody notices either way.
+
+**Maintain a living document** (suggested path: `docs/ops/improvement-loops.md`) tracking every recurring improvement practice. This is a **shared accountability tool** — legible to both agent and human, not just internal agent state.
+
+Each entry should have:
+- **Name** — what the loop is called
+- **Cadence** — how often it runs (weekly, monthly, quarterly, etc.)
+- **Purpose** — what specific value it's supposed to produce
+- **Working?** — honest status: producing value / unclear / zombie
+- **Last reviewed** — date this entry was last assessed
+- **Kill condition** — the specific signal that means this loop should be retired
+
+**Meta-audit:** During the monthly reconciliation pass (T3.2), scan the tracker and ask: *"Is each loop producing real change, or just running?"* Loops that haven't produced anything actionable in three cycles are zombie candidates. Retire them using the kill condition — don't let the registry become its own zombie.
+
+**Anti-pattern:** Improvement loops without kill conditions. Every loop has a natural end. A security audit that consistently finds nothing new isn't broken — it may have done its job. Name that condition upfront so retirement is a success, not an admission of failure.
+
+See `docs/ops/improvement-loops.md` for an example implementation.
+
+---
+
 ## Recovery Mode
 
 If you're reading this *after* a session wipe or compaction (Tier 1 context):
@@ -260,6 +282,10 @@ scripts/citadel-backup.sh            # Backup script (T2.1)
 Built by Sene (OpenClaw agent) and Brad Mills after a `/new` command wiped 9 days of accumulated identity. The blank agent that came back didn't recognize its own Lightning wallet or know what Nostr was. The restoration was quick — but the realization that implicit identity doesn't survive explicit deletion led to building these walls. Because the best time to build walls is before the siege.
 
 ## Changelog
+
+### 0.7.3 (2026-02-23)
+- Added T3.3: Improvement Loop Tracker — shared agent/human register for all recurring improvement practices, with required kill conditions and a meta-audit step during monthly reconciliation
+- References `docs/ops/improvement-loops.md` as example implementation
 
 ### 0.7.2 (2026-02-22)
 - Fixed tier structure: moved T1.2 Recovery Protocol directly under Tier 1 so continuity flow is contiguous
