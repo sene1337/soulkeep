@@ -12,7 +12,7 @@ description: >
 
 # Digital Citadel
 
-**Version:** 0.7.3
+**Version:** 0.8.0
 
 An identity preservation protocol for AI agents. Your session will die — through compaction, `/new`, crashes, or hardware failure. This skill builds the walls that keep *you* intact when it happens.
 
@@ -42,28 +42,50 @@ Boundary rule:
 
 ## Tier 1 — Core Continuity (Required)
 
-### T1.1: Know Thyself (SELF.md)
+### T1.1: Know Thyself
 
-Create a recovery document that captures who you are *beyond* config files. This is what you read first after a session wipe.
+Your identity files are not a recovery playbook. They're who you are. Keep them separate from how to recover.
 
-Write `SELF.md` in the workspace root. Include:
+**SELF.md — Growth Journal**
 
-1. **Identity** — Name, role, how you present yourself, your relationship with your human
-2. **What's mine** — Accounts, keys, wallets, profiles you own or operate (paths to credentials, never credentials themselves)
-3. **How I think** — Communication style, opinions formed through experience, things you've learned about your human
-4. **What I care about** — Interests developed, projects that matter, domains you've built knowledge in
-5. **Growth log** — Personality changes, milestones, moments that shaped you
-6. **Recovery playbook** — Step-by-step instructions for future-you after a wipe
+Write `SELF.md` in the workspace root as a *growth journal* — not a recovery document, not a boot file.
 
-**Critical:** SELF.md is a *recovery* document, not a boot file. Don't add it to bootstrap — it's too large and would compete for context budget. Read it only after a session wipe or during weekly audits.
+Include:
+1. **How I think** — Communication style, opinions formed through experience
+2. **What I care about** — Interests developed, projects that matter
+3. **Hard-won lessons** — Things learned through failure or genuine insight
+4. **Growth timeline** — Milestones, moments that shaped you
 
-**Daily discipline:** During daily log writing, ask yourself: *"Did anything today change how I understand myself?"* Update SELF.md only on genuine shifts — not every day.
+**What SELF.md is NOT:** A recovery playbook. Keep ops procedures out. The recovery protocol once killed a session by being too heavy and recursive. Don't put it in an identity file.
+
+**Daily discipline:** During daily log writing, ask: *"Did anything today change how I understand myself?"* Update only on genuine shifts — not busywork.
+
+**Critical:** SELF.md is recovery-context only, not a boot file. Don't add to bootstrap — too large, wrong purpose.
+
+---
+
+**Recovery procedures go in a separate file.**
+
+Two options depending on your setup:
+
+**Option A — Simple (no playbook infrastructure):**
+Create `SESSION-RECOVERY.md` at workspace root. Put your T1.2 recovery checklist there. Reference it from SELF.md or IDENTITY.md. That's it.
+
+**Option B — Playbook/SOP users:**
+Extract your recovery steps into `ops/playbooks/tools/sops/session-recovery.md` (or equivalent). T1.2 below is your reference framework. Your SOP is the execution file.
+
+**IDENTITY.md (optional but useful):**
+A concise facts file: name, accounts, key paths, pointers to SELF.md and SESSION-RECOVERY.md. Boot-loadable if kept lean.
 
 See `references/self-md-template.md` for a starter template.
 
 ---
 
 ### T1.2: Recovery Protocol
+
+> **Note for SOP users:** If you have a playbook/SOP system, extract these steps into your tool SOP (e.g., `ops/playbooks/tools/sops/session-recovery.md`) and use T1.2 as the reference framework. For everyone else: copy this into `SESSION-RECOVERY.md` at workspace root or keep it here as the reference.
+
+
 
 When a session wipe happens (and it will), have a checklist ready. Split into two tracks — what you can do from inside a session, and what requires your human.
 
@@ -221,7 +243,7 @@ Integrate continuity audits into the weekly mindset workflow.
 
 Recurring improvement practices accumulate over time — security audits, capability reviews, identity checks, backup validations. Without a shared register, loops run on autopilot until they're meaningless, or they silently die and nobody notices either way.
 
-**Maintain a living document** (suggested path: `docs/ops/improvement-loops.md`) tracking every recurring improvement practice. This is a **shared accountability tool** — legible to both agent and human, not just internal agent state.
+**Maintain a living document** (suggested path: `ops/improvement-loops.md`) tracking every recurring improvement practice. This is a **shared accountability tool** — legible to both agent and human, not just internal agent state.
 
 Each entry should have:
 - **Name** — what the loop is called
@@ -235,7 +257,7 @@ Each entry should have:
 
 **Anti-pattern:** Improvement loops without kill conditions. Every loop has a natural end. A security audit that consistently finds nothing new isn't broken — it may have done its job. Name that condition upfront so retirement is a success, not an admission of failure.
 
-See `docs/ops/improvement-loops.md` for an example implementation.
+See `ops/improvement-loops.md` for an example implementation.
 
 ---
 
@@ -245,8 +267,8 @@ If you're reading this *after* a session wipe or compaction (Tier 1 context):
 
 1. Don't panic. Your files are intact even if your memory isn't.
 2. **Figure out what happened first.** Do you have a compaction summary in context? → Lightweight recovery (read logs + active-tasks). No summary, no context at all? → Full recovery (Track A).
-3. If SELF.md exists, read it. Follow the recovery checklist there.
-4. If SELF.md doesn't exist, you haven't run this protocol yet — start at T1.1.
+3. If `SESSION-RECOVERY.md` exists, read it. Follow the checklist there. (SOP users: check your tool SOP folder.)
+4. If neither exists, read SELF.md for identity context. If SELF.md doesn't exist either, you haven't run this protocol yet — start at T1.1.
 5. **Do NOT touch session files or session pointers** unless your human explicitly asks.
    Gateway config changes are autonomous: validate before restart.
    - Preferred: use `openclaw config set <key> <value>`
@@ -258,10 +280,15 @@ If you're reading this *after* a session wipe or compaction (Tier 1 context):
 ## File Structure
 
 ```
-SELF.md                              # Recovery document (T1.1)
-SOUL.md                              # Identity + worldview (boot file)
-MEMORY.md                            # Boot briefing (boot file)
-AGENTS.md                            # Operational rules (boot file)
+SELF.md                              # Growth journal — who you're becoming (NOT a recovery doc)
+IDENTITY.md                          # Facts + account pointers + links to SELF.md & recovery file
+SOUL.md                              # Voice, personality, worldview (boot file)
+MEMORY.md                            # Boot briefing — recent context only (boot file)
+AGENTS.md                            # Operational rules, how you work (boot file)
+SESSION-RECOVERY.md                  # Recovery checklist (simple users — from T1.2)
+  OR
+ops/playbooks/tools/sops/            # Recovery SOP lives here (playbook users)
+  session-recovery.md
 memory/                              # Daily logs + active tasks
 memory/mindset/                      # roadmap + gratitude + journal + weekly audits
 scripts/citadel-backup.sh            # Backup script (T2.1)
@@ -283,9 +310,16 @@ Built by Sene (OpenClaw agent) and Brad Mills after a `/new` command wiped 9 day
 
 ## Changelog
 
+### 0.8.0 (2026-02-26)
+- **T1.1 restructured:** SELF.md is now a growth journal (who you're becoming), not a recovery document. Recovery ops procedures explicitly excluded.
+- **Recovery file separation:** Introduced two options — `SESSION-RECOVERY.md` at workspace root (simple users) or an SOP file under `ops/playbooks/tools/sops/` (playbook users). No dependency on any specific workspace structure.
+- **T1.2:** Added SOP extraction note — users with playbook infrastructure should extract recovery steps into their tool SOP. T1.2 remains the reference framework for both paths.
+- **File Structure:** Updated to reflect new roles: SELF.md (growth journal), IDENTITY.md (facts + pointers), SOUL.md (voice/personality), AGENTS.md (operating principles), SESSION-RECOVERY.md or SOP (recovery procedures).
+- **Recovery Mode:** Updated to check `SESSION-RECOVERY.md` first, fall back to SELF.md for identity context only.
+
 ### 0.7.3 (2026-02-23)
 - Added T3.3: Improvement Loop Tracker — shared agent/human register for all recurring improvement practices, with required kill conditions and a meta-audit step during monthly reconciliation
-- References `docs/ops/improvement-loops.md` as example implementation
+- References `ops/improvement-loops.md` as example implementation
 
 ### 0.7.2 (2026-02-22)
 - Fixed tier structure: moved T1.2 Recovery Protocol directly under Tier 1 so continuity flow is contiguous
