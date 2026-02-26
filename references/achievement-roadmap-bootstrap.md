@@ -35,7 +35,7 @@ Attach execution to repeatable cues.
 
 ## Output Format
 Create/update:
-- `docs/ops/sene-achievement-roadmap.md` (or agent equivalent)
+- `ops/sene-achievement-roadmap.md` (or agent equivalent)
 - `memory/active-tasks.md` (top 1-3 weekly moves)
 
 ## Daily Prompt Pair (mandatory)

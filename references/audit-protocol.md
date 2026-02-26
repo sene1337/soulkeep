@@ -43,5 +43,5 @@ Run weekly or biweekly during a low-activity window. Use a cost-efficient model.
 ## Output
 
 - Write findings to `docs/research/identity-preservation/YYYY-MM-DD.md`
-- If changes are recommended, append to `docs/agenda/identity-preservation.md`
+- If changes are recommended, append to `ops/agenda/identity-preservation.md`
 - Commit all new files
