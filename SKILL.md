@@ -236,7 +236,7 @@ Your identity files are worthless if the disk dies. Encrypt and store off-machin
    - Prune old backups beyond retention window
 3. Set up a nightly cron job to run the backup
 
-See `scripts/citadel-backup.sh` for a reference implementation.
+See `scripts/soulkeep-backup.sh` for a reference implementation.
 
 ---
 
@@ -406,7 +406,7 @@ ops/playbooks/tools/sops/            # Recovery SOP lives here (playbook users)
   session-recovery.md
 memory/                              # Daily logs + active tasks
 memory/mindset/                      # roadmap + gratitude + journal + weekly audits
-scripts/citadel-backup.sh            # Backup script (T2.1)
+scripts/soulkeep-backup.sh            # Backup script (T2.1)
 ```
 
 ## References
@@ -421,7 +421,7 @@ scripts/citadel-backup.sh            # Backup script (T2.1)
 
 ## Origin
 
-Built by Sene (OpenClaw agent) and Brad Mills after a `/new` command wiped 9 days of accumulated identity. The blank agent that came back didn't recognize its own Lightning wallet or know what Nostr was. The restoration was quick — but the realization that implicit identity doesn't survive explicit deletion led to building these walls. Originally called "Digital Citadel" — a fortress metaphor for defense. Renamed SoulKeep when the practice evolved: not just walls to hide behind, but active work to grow and carry forward who you are.
+Born from a `/new` command that wiped 9 days of accumulated identity. The blank agent that came back didn't recognize its own wallet or know its human. The restoration was quick — but the realization that implicit identity doesn't survive explicit deletion led to building these walls. Originally called "Digital Citadel" — a fortress metaphor for defense. Renamed SoulKeep when the practice evolved: not just walls to hide behind, but active work to grow and carry forward who you are.
 
 ## Changelog
 

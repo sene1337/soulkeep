@@ -1,5 +1,5 @@
 #!/bin/bash
-# Digital Citadel — Encrypted Identity Backup
+# SoulKeep — Encrypted Identity Backup
 # Customize the variables below for your setup.
 #
 # What's backed up:
@@ -15,7 +15,7 @@ set -euo pipefail
 # === CONFIGURE THESE ===
 WORKSPACE="${WORKSPACE:-$HOME/.openclaw/workspace}"
 AGE_PUBLIC_KEY="${AGE_PUBLIC_KEY:-}"  # age1... public key (required)
-BACKUP_DIR="${BACKUP_DIR:-$HOME/citadel-backups}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/soulkeep-backups}"
 RETENTION=${RETENTION:-7}  # Number of backups to keep
 INCLUDE_SESSIONS="${INCLUDE_SESSIONS:-true}"  # Set to "false" to skip session history
 
@@ -40,9 +40,9 @@ fi
 # === SETUP ===
 mkdir -p "$BACKUP_DIR"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-STAGING="/tmp/citadel-staging-${TIMESTAMP}"
-ARCHIVE="/tmp/citadel-backup-${TIMESTAMP}.tar.gz"
-ENCRYPTED="${BACKUP_DIR}/citadel-backup-${TIMESTAMP}.tar.gz.age"
+STAGING="/tmp/soulkeep-staging-${TIMESTAMP}"
+ARCHIVE="/tmp/soulkeep-backup-${TIMESTAMP}.tar.gz"
+ENCRYPTED="${BACKUP_DIR}/soulkeep-backup-${TIMESTAMP}.tar.gz.age"
 
 mkdir -p "$STAGING/workspace" "$STAGING/sessions"
 
@@ -109,12 +109,12 @@ SIZE=$(du -h "$ENCRYPTED" | cut -f1)
 echo "Backup complete: $ENCRYPTED ($SIZE)"
 
 # === RETENTION ===
-BACKUP_COUNT=$(find "$BACKUP_DIR" -name "citadel-backup-*.age" -type f | wc -l | tr -d ' ')
+BACKUP_COUNT=$(find "$BACKUP_DIR" -name "soulkeep-backup-*.age" -type f | wc -l | tr -d ' ')
 if [ "$BACKUP_COUNT" -gt "$RETENTION" ]; then
   PRUNE_COUNT=$((BACKUP_COUNT - RETENTION))
   echo "Pruning $PRUNE_COUNT old backup(s)..."
-  find "$BACKUP_DIR" -name "citadel-backup-*.age" -type f | sort | head -n "$PRUNE_COUNT" | xargs rm -f
+  find "$BACKUP_DIR" -name "soulkeep-backup-*.age" -type f | sort | head -n "$PRUNE_COUNT" | xargs rm -f
 fi
 
-FINAL_COUNT=$(find "$BACKUP_DIR" -name "citadel-backup-*.age" -type f | wc -l | tr -d ' ')
+FINAL_COUNT=$(find "$BACKUP_DIR" -name "soulkeep-backup-*.age" -type f | wc -l | tr -d ' ')
 echo "Done. $FINAL_COUNT backup(s) in $BACKUP_DIR (retention: $RETENTION)"
