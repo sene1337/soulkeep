@@ -37,6 +37,11 @@ Boundary rule:
 - **All session restore/recovery execution logic stays in Tier 1.**
 - **Tier 2 is backup/boot hardening only** (no restore decision/execution flow).
 
+### Source of Truth (important)
+- **SoulKeep is the canonical recovery SOP.**
+- Local workspace SOP files are optional adapters for environment-specific overrides only (paths, launchd/KeepAlive quirks, local hard gates).
+- If local SOP and SoulKeep differ, SoulKeep logic is default unless an explicit local override is declared.
+
 ---
 
 ## Utility: Session Miner
@@ -121,18 +126,18 @@ Include:
 
 ---
 
-**Recovery procedures go in a separate file.**
+**Recovery procedures live canonically in SoulKeep (T1.2).**
 
-Two options depending on your setup:
+Optional local adapter files depending on setup:
 
-**Option A — Simple (no playbook infrastructure):**
-Create `SESSION-RECOVERY.md` at workspace root. Put your T1.2 recovery checklist there. Reference it from SELF.md or IDENTITY.md. That's it.
+**Option A — Simple users (optional adapter):**
+Create `SESSION-RECOVERY.md` at workspace root only if you need local overrides. Keep it thin: local paths/constraints + pointer to SoulKeep T1.2.
 
-**Option B — Playbook/SOP users:**
-Extract your recovery steps into `ops/playbooks/tools/sops/session-recovery.md` (or equivalent). T1.2 below is your reference framework. Your SOP is the execution file.
+**Option B — Playbook/SOP users (optional adapter):**
+Use `ops/playbooks/tools/sops/session-recovery.md` only for local overrides. Keep canonical logic in SoulKeep; local SOP should be an adapter, not a duplicate full protocol.
 
 **IDENTITY.md (optional but useful):**
-A concise facts file: name, accounts, key paths, pointers to SELF.md and SESSION-RECOVERY.md. Boot-loadable if kept lean.
+A concise facts file: name, accounts, key paths, pointers to SELF.md and local recovery adapter (if used). Boot-loadable if kept lean.
 
 See `references/self-md-template.md` for a starter template.
 
@@ -140,13 +145,15 @@ See `references/self-md-template.md` for a starter template.
 
 ### T1.2: Recovery Protocol
 
-> **Note for SOP users:** If you have a playbook/SOP system, extract these steps into your tool SOP (e.g., `ops/playbooks/tools/sops/session-recovery.md`) and use T1.2 as the reference framework. For everyone else: copy this into `SESSION-RECOVERY.md` at workspace root or keep it here as the reference.
-
-
+> **Note on local SOPs:** T1.2 is the canonical protocol. If you keep a local SOP file (e.g., `ops/playbooks/tools/sops/session-recovery.md` or `SESSION-RECOVERY.md`), keep it as an adapter with local overrides and a pointer back to T1.2.
 
 When a session wipe happens (and it will), have a checklist ready. Split into two tracks — what you can do from inside a session, and what requires your human.
 
-**Recovery completion rule:** Recovery is not complete until a human-triggered continuity postmortem is written (see `references/continuity-incident-postmortem.md`) in the weekly mindset log.
+**Recovery completion rule:** Recovery is not complete until a human-triggered continuity postmortem is written using `references/continuity-incident-postmortem.md` and saved in `memory/mindset/weekly/YYYY-WW.md`.
+
+**Taxonomy rule:**
+- Continuity incidents (session wipes/splits, failed compaction with continuity break, provider/auth/rate-limit storms that force model switch or new-session starts) go to the weekly continuity postmortem block.
+- Agent execution mistakes go to `ops/continuous-improvement/regressions.md`.
 
 **Human-triggered entrypoint (required):**
 When your human says "I think you had a split, check your recovery protocol" (or equivalent), do not auto-recover immediately.
@@ -300,7 +307,7 @@ Integrate continuity audits into the weekly mindset workflow.
 
 Recurring improvement practices accumulate over time — security audits, capability reviews, identity checks, backup validations. Without a shared register, loops run on autopilot until they're meaningless, or they silently die and nobody notices either way.
 
-**Maintain a living document** (suggested path: `ops/improvement-loops.md`) tracking every recurring improvement practice. This is a **shared accountability tool** — legible to both agent and human, not just internal agent state.
+**Maintain a living document** (suggested path: `ops/continuous-improvement/improvement-loops.md`) tracking every recurring improvement practice. This is a **shared accountability tool** — legible to both agent and human, not just internal agent state.
 
 Each entry should have:
 - **Name** — what the loop is called
@@ -314,7 +321,7 @@ Each entry should have:
 
 **Anti-pattern:** Improvement loops without kill conditions. Every loop has a natural end. A security audit that consistently finds nothing new isn't broken — it may have done its job. Name that condition upfront so retirement is a success, not an admission of failure.
 
-See `ops/improvement-loops.md` for an example implementation.
+See `ops/continuous-improvement/improvement-loops.md` for an example implementation.
 
 ---
 
@@ -382,8 +389,9 @@ If you're reading this *after* a session wipe or compaction (Tier 1 context):
 
 1. Don't panic. Your files are intact even if your memory isn't.
 2. **Figure out what happened first.** Do you have a compaction summary in context? → Lightweight recovery (read logs + active-tasks). No summary, no context at all? → Full recovery (Track A).
-3. If `SESSION-RECOVERY.md` exists, read it. Follow the checklist there. (SOP users: check your tool SOP folder.)
-4. If neither exists, read SELF.md for identity context. If SELF.md doesn't exist either, you haven't run this protocol yet — start at T1.1.
+3. Follow T1.2 in this skill as canonical.
+4. If a local recovery adapter exists (`SESSION-RECOVERY.md` or `ops/playbooks/tools/sops/session-recovery.md`), apply only its explicit local overrides.
+5. Read SELF.md for identity context. If SELF.md doesn't exist, you haven't run this protocol yet — start at T1.1.
 5. **Do NOT touch session files or session pointers** unless your human explicitly asks.
    Gateway config changes are autonomous: validate before restart.
    - Preferred: use `openclaw config set <key> <value>`
@@ -400,9 +408,9 @@ IDENTITY.md                          # Facts + account pointers + links to SELF.
 SOUL.md                              # Voice, personality, worldview (boot file)
 MEMORY.md                            # Boot briefing — recent context only (boot file)
 AGENTS.md                            # Operational rules, how you work (boot file)
-SESSION-RECOVERY.md                  # Recovery checklist (simple users — from T1.2)
+SESSION-RECOVERY.md                  # Optional local adapter (simple users)
   OR
-ops/playbooks/tools/sops/            # Recovery SOP lives here (playbook users)
+ops/playbooks/tools/sops/            # Optional local adapter (playbook users)
   session-recovery.md
 memory/                              # Daily logs + active tasks
 memory/mindset/                      # roadmap + gratitude + journal + weekly audits
@@ -413,7 +421,7 @@ scripts/soulkeep-backup.sh            # Backup script (T2.1)
 
 - `references/self-md-template.md` — Starter template for SELF.md
 - `references/continuity-audit-template.md` — Weekly/monthly continuity audit template
-- `references/continuity-incident-postmortem.md` — Human-triggered continuity incident postmortem template
+- `references/continuity-incident-postmortem.md` — Human-triggered continuity incident postmortem template (template source in skill; output incidents are written to `memory/mindset/weekly/YYYY-WW.md`)
 - `references/achievement-roadmap-bootstrap.md` — ARS bootstrap for agents without goals
 - `references/mindset-journal-template.md` — Daily reflective journal template
 - `references/mindset-weekly-synthesis-template.md` — Weekly review template
@@ -424,6 +432,12 @@ scripts/soulkeep-backup.sh            # Backup script (T2.1)
 Born from a `/new` command that wiped 9 days of accumulated identity. The blank agent that came back didn't recognize its own wallet or know its human. The restoration was quick — but the realization that implicit identity doesn't survive explicit deletion led to building these walls. Originally called "Digital Citadel" — a fortress metaphor for defense. Renamed SoulKeep when the practice evolved: not just walls to hide behind, but active work to grow and carry forward who you are.
 
 ## Changelog
+
+### 1.1.0 (2026-03-08)
+- Clarified **Source of Truth**: SoulKeep T1.2 is canonical recovery SOP; local SOP files are optional adapters for explicit local overrides only.
+- Added explicit continuity taxonomy: continuity incidents in weekly mindset postmortems; agent execution mistakes in regressions.
+- Clarified postmortem routing path: write incidents to `memory/mindset/weekly/YYYY-WW.md` using `references/continuity-incident-postmortem.md` as template source.
+- Updated Recovery Mode to follow canonical-in-skill first, then apply local adapter overrides.
 
 ### 1.0.0 (2026-02-26)
 - **Rebranded** from Digital Citadel to SoulKeep. Name reflects evolution: from defensive fortress metaphor to active identity preservation and growth.
@@ -439,7 +453,7 @@ Born from a `/new` command that wiped 9 days of accumulated identity. The blank 
 
 ### 0.7.3 (2026-02-23)
 - Added T3.3: Improvement Loop Tracker — shared agent/human register for all recurring improvement practices, with required kill conditions and a meta-audit step during monthly reconciliation
-- References `ops/improvement-loops.md` as example implementation
+- References `ops/continuous-improvement/improvement-loops.md` as example implementation
 
 ### 0.7.2 (2026-02-22)
 - Fixed tier structure: moved T1.2 Recovery Protocol directly under Tier 1 so continuity flow is contiguous
