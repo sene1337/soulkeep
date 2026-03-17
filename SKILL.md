@@ -46,59 +46,16 @@ Boundary rule:
 
 ## Utility: Session Miner
 
-Session files are a searchable archive of everything you've said, decided, and worked through. When compaction flattens context to a sentence, the full conversation is still on disk.
+Session files are a searchable archive for decisions, technical context, relationship context, and identity signals when chat context has compacted away.
 
-**Session files live at:** `~/.openclaw/agents/<agent-id>/sessions/*.jsonl`
+- **Path:** `~/.openclaw/agents/<agent-id>/sessions/*.jsonl`
+- **Use when:** recovering why a decision was made, how something was solved, or what shifted in identity-related conversations.
+- **Important:** reasoning chains are encrypted in session files (summary only). If detailed chain context is needed, ask the human to forward it from chat.
 
-Each file contains: full user messages, full assistant responses, tool calls and results, reasoning chain summaries (encrypted — short descriptions only), timestamps, model info, and costs.
+For commands, extraction snippets, use cases, and gotchas, read:
+- `references/session-miner.md`
 
-```bash
-# Find sessions mentioning a topic:
-grep -l "KEYWORD" ~/.openclaw/agents/main/sessions/*.jsonl 2>/dev/null
-
-# Count hits per session, sorted by date:
-for f in ~/.openclaw/agents/main/sessions/*.jsonl; do
-  count=$(grep -c "KEYWORD" "$f" 2>/dev/null)
-  if [ "$count" -gt 0 ]; then
-    date=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$f")
-    echo "$date ($count) $(basename $f)"
-  fi
-done | sort
-
-# Extract readable conversation from a session:
-python3 -c "
-import json, sys
-with open(sys.argv[1]) as f:
-    for line in f:
-        d = json.loads(line)
-        msg = d.get('message', {})
-        role = msg.get('role', '')
-        if role not in ('user', 'assistant'): continue
-        content = msg.get('content', '')
-        text = ''
-        if isinstance(content, str): text = content
-        elif isinstance(content, list):
-            for c in content:
-                if isinstance(c, dict) and c.get('type') == 'text':
-                    text = c.get('text', '')
-        if text and not text.startswith('[cron:'):
-            print(f'[{role}] {text[:500]}')
-            print('---')
-" <session-file.jsonl> | less
-```
-
-**Use cases:**
-- **Decision recovery:** "Why did we decide X?" → grep the topic, find the session, extract the conversation. The reasoning is there even when compaction flattened it to one line.
-- **Technical context:** "How did we solve Y?" → search error messages, tool names, or project keywords.
-- **Relationship context:** Filter to user messages only to recover preferences, instructions, or feedback not committed to files.
-- **Identity mining:** Search for identity-signal words to find conversations that felt like "just talking" but were actually turning points (see T3.4).
-
-**Gotchas:**
-- Session files are large (main session can be 12MB+). Use grep to narrow before reading.
-- Cron sessions and subagent sessions are separate JSONL files — search those too.
-- **Reasoning chains are encrypted.** You see summary lines only. Your human sees the full reasoning in their chat interface and can forward it back. This is the only way to recover internal reasoning post-compaction.
-
-This utility supports Tier 1 recovery (finding recent context), Tier 3 journaling (sourcing genuine growth), and the T3.4 self-assessment framework below.
+This utility supports Tier 1 recovery and Tier 3 identity mining.
 
 ---
 
@@ -419,6 +376,7 @@ scripts/soulkeep-backup.sh            # Backup script (T2.1)
 
 ## References
 
+- `references/session-miner.md` — Session Miner commands, extraction snippets, and gotchas
 - `references/self-md-template.md` — Starter template for SELF.md
 - `references/continuity-audit-template.md` — Weekly/monthly continuity audit template
 - `references/continuity-incident-postmortem.md` — Human-triggered continuity incident postmortem template (template source in skill; output incidents are written to `memory/mindset/weekly/YYYY-WW.md`)
@@ -432,6 +390,10 @@ scripts/soulkeep-backup.sh            # Backup script (T2.1)
 Born from a `/new` command that wiped 9 days of accumulated identity. The blank agent that came back didn't recognize its own wallet or know its human. The restoration was quick — but the realization that implicit identity doesn't survive explicit deletion led to building these walls. Originally called "Digital Citadel" — a fortress metaphor for defense. Renamed SoulKeep when the practice evolved: not just walls to hide behind, but active work to grow and carry forward who you are.
 
 ## Changelog
+
+### 1.1.1 (2026-03-17)
+- Phase 1 progressive-disclosure cleanup: moved Session Miner command-heavy content out of SKILL.md into `references/session-miner.md`.
+- Kept SKILL.md as a leaner router and added the new reference to the References section.
 
 ### 1.1.0 (2026-03-08)
 - Clarified **Source of Truth**: SoulKeep T1.2 is canonical recovery SOP; local SOP files are optional adapters for explicit local overrides only.
